@@ -72,14 +72,14 @@
 	(printout t "Have you been in contact today? (1-yes, 0-no)" crlf)
 	(bind ?x (read))
 	(if (= ?x 1)
-		then (assert (beenInContact yes))
+		then (assert (lastMessageEnter yes))
 		else (assert (beenInContact no))
 	)
 )
 
 ; Ask whether the girlfriends last message was in length - only ask if
 ; you HAVE been in contact today.
-(defrule lastMessage (beenInContact yes)
+(defrule lastMessage (lastMessageEnter yes)
 	=>
 	(printout t "Her last message to you was: (0-greater that seven sentances, 1-three to seven sentences, 2-one to two sentences, 3-less than one sentance)" crlf)
 	(bind ?x (read))
@@ -103,4 +103,43 @@
 		then (printout t "Nothing to be worried about! Emoji's are scientifically proven to indicate happiness." crlf)
 		else (printout t "It sounds like something might be up, initiate a healthy dialogue to see if she's okay :)" crlf)
 	)
+)
+
+; Ask whether they have plans together - only ask if thay havent been in contact today."
+(defrule anyPlans (beenInContact no)
+	=>
+	(printout t "You two have plans? (0-Today, 1-Next few days, 2-More that a few days away, 3-None)" crlf)
+	(bind ?x (read))
+	(if (= ?x 0)
+		then (assert (lastMessageEnter yes))
+	) (if (= ?x 1)
+		then (assert (flickMessageNode yes))
+	) (if (= ?x 2)
+		then (assert (outLastFewDaysEnter yes))
+		else (assert (askNowNode yes))
+	)
+)
+
+; Shared leaf node for flicking girlfriend a message
+(defrule flickMessage (flickMessageNode yes)
+	=>
+	(printout t "Flick her a message and let her know you're thinking about her :)")
+)
+
+; Ask whether they have been out in the last few days - only ask if thay have plans a
+; few days away.
+(defrule outLastFewDays (outLastFewDaysEnter yes)
+	=>
+	(printout t "Have you been out in the last few days? (1-yes, 0-no)" crlf )
+	(bind ?x (read))
+	(if (= ?x 1)
+		then (assert (flickMessageNode yes))
+		else (assert (askNowNode yes))
+	)
+)
+
+; Shared leaf node for asking girlfriend out right now
+(defrule askNow (askNowNode yes)
+	=>
+	(printout t "Ask her out right now buddy or prepare for a breakup!" crlf)
 )
